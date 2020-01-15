@@ -1,0 +1,64 @@
+#!/usr/bin/env node
+
+
+// Example:
+// stackpos error@https://domain.com/path/to/file.js:3:42
+
+const DEFAULT_CONTEXT = 100;
+
+const USAGE = `Usage: stackpos <path> [options]
+
+Options:
+  -c, --context         Length of surrounding context to fetch, default ${DEFAULT_CONTEXT} (chars)`;
+
+const argv = require('argh').argv;
+const https = require('https');
+
+// If nothing passed - print usage instructions
+if (!argv.argv || !argv.argv.length) {
+    console.log(USAGE);
+    process.exit(0);
+}
+
+const CONTEXT = argv.c ? parseInt(argv.argv[1], 10) : DEFAULT_CONTEXT;
+
+const path = argv.argv[0];
+const parts = path.split('@');
+const urlParts = parts[parts.length - 1].split(':');
+
+const colNo = parseInt(urlParts[urlParts.length - 1], 10);
+const lineNo = parseInt(urlParts[urlParts.length - 2], 10);
+const url = urlParts.slice(0, -2).join(':');
+
+function readUrl(url) {
+    https.get(url, (resp) => {
+        let data = '';
+
+        // A chunk of data has been recieved
+        resp.on('data', (chunk) => {
+            data += chunk;
+        });
+
+        // The whole response has been received. Print out the result
+        resp.on('end', () => {
+            printPosition(data);
+        });
+
+    }).on('error', (err) => {
+        console.error(err.message);
+    });
+}
+
+function printPosition(data) {
+    const lines = data.split('\n');
+    const line = lines[lineNo - 1];
+
+    const fill = Array(CONTEXT - 1).fill(' ').join('') + '↓';
+    const string = line.substr(colNo - CONTEXT, 2 * CONTEXT);
+
+    // Print result
+    console.log(fill);
+    console.log(string);
+}
+
+readUrl(url);
