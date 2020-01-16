@@ -12,7 +12,7 @@
 
     <script>
 
-     const CONTEXT = 20;
+     const CONTEXT = 40;
 
      // Memoize expesive url fetch results
      const memoReadUrl = (() => {
@@ -57,14 +57,14 @@
          })
      }
 
-     function getPosition(data, lineNo, colNo, CONTEXT, done) {
+     function getPosition(data, lineNo, colNo, context, done) {
        const lines = data.split('\n');
        const line = lines[lineNo - 1];
-       const string = line.substr(Math.max(colNo - CONTEXT, 0), 2 * CONTEXT);
+       const string = line.substr(Math.max(colNo - context, 0), 2 * context);
 
        let charNdx = Math.floor(string.length / 2) + 1;
-       if (colNo + CONTEXT > string.length) {
-         charNdx = colNo > CONTEXT ? CONTEXT : colNo - 1;
+       if (colNo + context > string.length) {
+         charNdx = colNo > context ? context : colNo - 1;
        }
 
        done(string, charNdx);
