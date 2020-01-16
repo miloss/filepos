@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+  </head>
+  <body>
+    <div style="font-family: monospace;">
+      https://raw.githubusercontent.com/miloss/stackpos/master/src/browser.js:4:12
+      <br/>
+      https://raw.githubusercontent.com/miloss/stackpos/master/bin/stackpos:12:42
+    </div>
+
+    <script>
+
+     const CONTEXT = 20;
+
+     // Memoize expesive url fetch results
+     const memoReadUrl = (() => {
+       const memo = {};
+       return (url, done) => {
+         if (memo[url]) {
+           return done(memo[url]);
+         }
+
+         readUrl(url, data => {
+           memo[url] = data;
+           done(memo[url]);
+         });
+       };
+     })();
+
+     //main('https://raw.githubusercontent.com/miloss/stackpos/master/bin/stackpos:12:42');
+
+     function main(string, done) {
+       const parts = string.split('@');
+       const urlParts = parts[parts.length - 1].split(':');
+
+       const colNo = parseInt(urlParts[urlParts.length - 1], 10);
+       const lineNo = parseInt(urlParts[urlParts.length - 2], 10);
+       const url = urlParts.slice(0, -2).join(':');
+
+       memoReadUrl(url, data => {
+         getPosition(data, lineNo, colNo, CONTEXT, (string, ndx) => {
+           // Print result
+           const fill = Array(ndx).fill(' ').join('') + '↓';
+           console.log(fill);
+           console.log(string);
+           done(string, ndx);
+         });
+       });
+     }
+
+     function readUrl(url, done) {
+       fetch(url)
+         .then(response => {
+           return response.text().then(done);
+         })
+     }
+
+     function getPosition(data, lineNo, colNo, CONTEXT, done) {
+       const lines = data.split('\n');
+       const line = lines[lineNo - 1];
+       const string = line.substr(Math.max(colNo - CONTEXT, 0), 2 * CONTEXT);
+
+       let charNdx = Math.floor(string.length / 2) + 1;
+       if (colNo + CONTEXT > string.length) {
+         charNdx = colNo > CONTEXT ? CONTEXT : colNo - 1;
+       }
+
+       done(string, charNdx);
+     }
+
+     function init(element) {
+       const html = element.innerHTML;
+       const newHTML = html.split('<br>').map(line => {
+         return `<span onclick=handleStringClick(this) style="text-decoration: underline; cursor: pointer;">${line.trim()}</span>`;
+       }).join('<br>');
+       element.innerHTML = newHTML;
+     }
+
+     function handleStringClick(element) {
+       const string = element.innerHTML;
+       element.innerHTML = `${string}...`;
+
+       main(string, (data, charNdx) => {
+         const foundHTML = `${data.substr(0, charNdx)}<span style="color: white; background-color: black;">${data[charNdx]}</span>${data.substr(charNdx + 1)}`;
+         const newHTML = `<span style="text-decoration: underline; text-decoration-style: dashed;">${string}</span><br/><span style="white-space: pre-wrap;">${foundHTML}</span><br/>`;
+         element.outerHTML = newHTML;
+       });
+     }
+
+     init(document.getElementsByTagName('div')[0]);
+     
+    </script>
+  </body>
+</html>

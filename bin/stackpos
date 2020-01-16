@@ -58,7 +58,7 @@ function readUrl(url, done) {
     });
 }
 
-function printPosition(data) {
+function printPosition(data, lineNo, colNo) {
     const lines = data.split('\n');
     const line = lines[lineNo - 1];
 
