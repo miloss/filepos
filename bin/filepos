@@ -2,17 +2,24 @@
 
 
 // Example:
-// stackpos error@https://domain.com/path/to/file.js:3:42
+// filepos error@https://domain.com/path/to/file.js:3:42
 
 const DEFAULT_CONTEXT = 100;
 
-const USAGE = `Usage: stackpos <path> [options]
+const USAGE = `Usage: filepos <path> [options]
 
 Options:
-  -c, --context         Length of surrounding context to fetch, default ${DEFAULT_CONTEXT} (chars)`;
+  -c, --context         Length of surrounding context to fetch, default ${DEFAULT_CONTEXT} (chars)
+  -v                    Print version number`;
 
 const argv = require('argh').argv;
 const https = require('https');
+
+// Print version number
+if (argv.v) {
+    console.log(require('../package.json').version);
+    process.exit(0);
+}
 
 // If nothing passed - print usage instructions
 if (!argv.argv || !argv.argv.length) {
@@ -21,12 +28,16 @@ if (!argv.argv || !argv.argv.length) {
 }
 
 const CONTEXT = argv.c ? parseInt(argv.argv[1], 10) : DEFAULT_CONTEXT;
-
+const TERMINAL_REVERSE_COLOR = '\x1b[7m';
 const string = argv.argv[0];
 
-main(string);
+main(string, (string, ndx) => {
+    // Print result
+    const result = `${string.substr(0, ndx)}\x1b[7m${string[ndx]}${string.substr(ndx + 1)}`;
+    console.log(result);
+});
 
-function main(string) {
+function main(string, done) {
     const parts = string.split('@');
     const urlParts = parts[parts.length - 1].split(':');
 
@@ -35,7 +46,7 @@ function main(string) {
     const url = urlParts.slice(0, -2).join(':');
 
     readUrl(url, data => {
-        printPosition(data, lineNo, colNo);
+        getPosition(data, lineNo, colNo, CONTEXT, done);
     });
 }
 
@@ -58,14 +69,15 @@ function readUrl(url, done) {
     });
 }
 
-function printPosition(data, lineNo, colNo) {
+function getPosition(data, lineNo, colNo, context, done) {
     const lines = data.split('\n');
     const line = lines[lineNo - 1];
+    const string = line.substr(Math.max(colNo - context, 0), 2 * context);
 
-    const fill = Array(CONTEXT - 1).fill(' ').join('') + '↓';
-    const string = line.substr(colNo - CONTEXT, 2 * CONTEXT);
+    let charNdx = Math.floor(string.length / 2) + 1;
+    if (colNo + context > string.length) {
+        charNdx = colNo > context ? context : colNo;
+    }
 
-    // Print result
-    console.log(fill);
-    console.log(string);
+    done(string, charNdx);
 }
