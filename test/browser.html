@@ -64,7 +64,7 @@
 
        let charNdx = Math.floor(string.length / 2) + 1;
        if (colNo + context > string.length) {
-         charNdx = colNo > context ? context : colNo - 1;
+         charNdx = colNo > context ? context : colNo;
        }
 
        done(string, charNdx);
