@@ -22,15 +22,24 @@ if (!argv.argv || !argv.argv.length) {
 
 const CONTEXT = argv.c ? parseInt(argv.argv[1], 10) : DEFAULT_CONTEXT;
 
-const path = argv.argv[0];
-const parts = path.split('@');
-const urlParts = parts[parts.length - 1].split(':');
+const string = argv.argv[0];
 
-const colNo = parseInt(urlParts[urlParts.length - 1], 10);
-const lineNo = parseInt(urlParts[urlParts.length - 2], 10);
-const url = urlParts.slice(0, -2).join(':');
+main(string);
 
-function readUrl(url) {
+function main(string) {
+    const parts = string.split('@');
+    const urlParts = parts[parts.length - 1].split(':');
+
+    const colNo = parseInt(urlParts[urlParts.length - 1], 10);
+    const lineNo = parseInt(urlParts[urlParts.length - 2], 10);
+    const url = urlParts.slice(0, -2).join(':');
+
+    readUrl(url, data => {
+        printPosition(data, lineNo, colNo);
+    });
+}
+
+function readUrl(url, done) {
     https.get(url, (resp) => {
         let data = '';
 
@@ -41,7 +50,7 @@ function readUrl(url) {
 
         // The whole response has been received. Print out the result
         resp.on('end', () => {
-            printPosition(data);
+            done(data);
         });
 
     }).on('error', (err) => {
@@ -60,5 +69,3 @@ function printPosition(data) {
     console.log(fill);
     console.log(string);
 }
-
-readUrl(url);

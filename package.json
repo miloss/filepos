@@ -1,0 +1,28 @@
+{
+  "name": "stackpos",
+  "version": "0.1.0",
+  "description": "Find text at line:column in remote file",
+  "scripts": {
+    "test": "npx ava",
+    "test:watch": "npx ava --watch"
+  },
+  "bin": {
+    "stackpos": "./bin/stackpos"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/miloss/stackpos.git"
+  },
+  "author": "Milos Popovic",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/miloss/stackpos/issues"
+  },
+  "homepage": "https://github.com/miloss/stackpos#readme",
+  "dependencies": {
+    "argh": "^1.0.0"
+  },
+  "devDependencies": {
+    "ava": "^2.4.0"
+  }
+}
