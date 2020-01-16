@@ -17,3 +17,10 @@ Usage: filepos <path> [options]
 Options:
 -c, --context         Length of surrounding context to fetch, default ${DEFAULT_CONTEXT} (chars)
 ```
+
+
+### Example
+
+```
+$ filepos https://raw.githubusercontent.com/miloss/filepos/master/bin/filepos:12:42
+```

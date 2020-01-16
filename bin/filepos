@@ -52,6 +52,11 @@ function main(string, done) {
 
 function readUrl(url, done) {
     https.get(url, (resp) => {
+        if (resp.statusCode !== 200) {
+            console.error('Error fetching url. HTTP status code:', resp.statusCode);
+            process.exit(1);
+        }
+
         let data = '';
 
         // A chunk of data has been recieved
@@ -71,6 +76,11 @@ function readUrl(url, done) {
 
 function getPosition(data, lineNo, colNo, context, done) {
     const lines = data.split('\n');
+    if (lineNo > lines.length) {
+        console.error('Could not find specified line');
+        process.exit(1);
+    }
+
     const line = lines[lineNo - 1];
     const string = line.substr(Math.max(colNo - context, 0), 2 * context);
 
