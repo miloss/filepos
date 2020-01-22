@@ -1,6 +1,6 @@
 # filepos
 
-> Find text at line:column in remote files
+> Find content at line:column in remote files
 
 
 ## Installation
@@ -15,7 +15,7 @@ $ filepos
 Usage: filepos <path> [options]
 
 Options:
--c, --context         Length of surrounding context to fetch, default ${DEFAULT_CONTEXT} (chars)
+-c, --context         Length of surrounding context to fetch, default 100 characters
 ```
 
 
