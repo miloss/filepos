@@ -1,7 +1,7 @@
 {
   "name": "filepos",
-  "version": "0.2.0",
-  "description": "Find text at line:column in remote file",
+  "version": "0.2.1",
+  "description": "Find content at line:column in remote file",
   "scripts": {
     "test": "npx ava",
     "test:watch": "npx ava --watch"
